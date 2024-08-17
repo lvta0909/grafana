@@ -14,7 +14,7 @@ import {
 import { LegendDisplayMode, SortOrder, TooltipDisplayMode } from '@grafana/schema';
 
 import { PieChartPanel } from './PieChartPanel';
-import { Options, PieChartType, PieChartLegendValues } from './panelcfg.gen';
+import { Options, PieChartType, PieChartLegendValues, PieChartThresholdType } from './panelcfg.gen';
 
 jest.mock('react-use', () => ({
   ...jest.requireActual('react-use'),
@@ -162,16 +162,88 @@ describe('PieChartPanel', () => {
         expect(slices.length).toBe(3);
       });
     });
+
+    describe('PieChartPanel - Grouping Values', () => {
+      const defaultConfig = {
+        custom: {
+          hideFrom: {
+            legend: false,
+            viz: false,
+            tooltip: false,
+          },
+        },
+      };
+
+      describe('when grouping by fixed number of values', () => {
+        const seriesWithMoreThanThreeItems = [
+          toDataFrame({
+            fields: [
+              { name: 'Chrome', config: defaultConfig, type: FieldType.number, values: [50] },
+              { name: 'Firefox', config: defaultConfig, type: FieldType.number, values: [30] },
+              { name: 'Safari', config: defaultConfig, type: FieldType.number, values: [10] },
+              { name: 'Edge', config: defaultConfig, type: FieldType.number, values: [5] },
+              { name: 'Opera', config: defaultConfig, type: FieldType.number, values: [5] },
+            ],
+          }),
+        ];
+
+        it('should group items beyond the configured number into "Others"', () => {
+          //        setup({ data: { series: seriesWithMoreThanThreeItems } });
+          setup({
+            data: { series: seriesWithMoreThanThreeItems },
+            options: {
+              thresholdType: PieChartThresholdType.Number,
+              thresholdNumber: 3,
+            },
+          });
+
+          const slices = screen.queryAllByTestId('data testid Pie Chart Slice');
+          expect(slices.length).toBe(4); // 3 visible items + 1 "Others"
+          expect(screen.queryByText(/Others/i)).toBeInTheDocument();
+        });
+      });
+
+      describe('when grouping by percentage', () => {
+        const seriesWithVariedValues = [
+          toDataFrame({
+            fields: [
+              { name: 'Chrome', config: defaultConfig, type: FieldType.number, values: [80] },
+              { name: 'Firefox', config: defaultConfig, type: FieldType.number, values: [10] },
+              { name: 'Safari', config: defaultConfig, type: FieldType.number, values: [5] },
+              { name: 'Edge', config: defaultConfig, type: FieldType.number, values: [3] },
+              { name: 'Opera', config: defaultConfig, type: FieldType.number, values: [2] },
+            ],
+          }),
+        ];
+
+        it('should group items below the configured percentage into "Others"', () => {
+          setup({
+            data: { series: seriesWithVariedValues },
+            options: {
+              thresholdType: PieChartThresholdType.Percentage,
+              thresholdPercentage: 0.04,
+            },
+          });
+
+          const slices = screen.queryAllByTestId('data testid Pie Chart Slice');
+          expect(slices.length).toBe(4); // 3 visible items + 1 "Others"
+          expect(screen.queryByText(/Others/i)).toBeInTheDocument();
+        });
+      });
+    });
   });
 });
 
-const setup = (propsOverrides?: {}) => {
+const setup = ({
+  options = {},
+  ...propsOverrides
+}: { options?: Partial<Options> } & Partial<PieChartPanelProps> = {}) => {
   const fieldConfig: FieldConfigSource = {
     defaults: {},
     overrides: [],
   };
 
-  const options: Options = {
+  const defaultOptions: Options = {
     pieType: PieChartType.Pie,
     displayLabels: [],
     legend: {
@@ -186,13 +258,14 @@ const setup = (propsOverrides?: {}) => {
     },
     orientation: VizOrientation.Auto,
     tooltip: { mode: TooltipDisplayMode.Multi, sort: SortOrder.Ascending },
+    ...options,
   };
 
   const props: PieChartPanelProps = {
     id: 1,
     data: { state: LoadingState.Done, timeRange: getDefaultTimeRange(), series: [] },
     timeZone: 'utc',
-    options: options,
+    options: defaultOptions,
     fieldConfig: fieldConfig,
     width: 532,
     height: 250,

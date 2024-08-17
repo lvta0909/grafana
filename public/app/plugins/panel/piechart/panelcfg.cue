@@ -1,3 +1,4 @@
+// panelcfg.cue
 // Copyright 2022 Grafana Labs
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,9 +24,9 @@ composableKinds: PanelCfg: {
 
 	lineage: {
 		schemas: [{
-			version: [0, 0]
+			version: [0, 1]
 			schema:
-			// v0.0
+			// v0.1
 			{
 				// Select the pie chart display style.
 				PieChartType: "pie" | "donut" @cuetsy(kind="enum")
@@ -42,12 +43,19 @@ composableKinds: PanelCfg: {
 					common.VizLegendOptions
 					values: [...PieChartLegendValues]
 				} @cuetsy(kind="interface")
+				// Select threshold options to display in the chart.
+				//  - Percentage: Group values bellow a percentage.
+				//  - Number: Display the first n values, group the others.
+				PieChartThresholdType: "percentage" | "number" @cuetsy(kind="enum")
 				Options: {
 					common.OptionsWithTooltip
 					common.SingleStatBaseOptions
 					pieType: PieChartType
 					displayLabels: [...PieChartLabels]
-					legend: PieChartLegendOptions
+					legend:               PieChartLegendOptions
+					thresholdType?:       PieChartThresholdType
+					thresholdPercentage?: float64
+					thresholdNumber?:     uint32
 				} @cuetsy(kind="interface")
 				FieldConfig: common.HideableFieldConfig @cuetsy(kind="interface")
 			}

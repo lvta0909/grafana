@@ -22,7 +22,7 @@ import {
 } from '@grafana/ui';
 
 import { PieChart } from './PieChart';
-import { PieChartLegendOptions, PieChartLegendValues, Options } from './panelcfg.gen';
+import { PieChartLegendOptions, PieChartLegendValues, PieChartThresholdType, Options } from './panelcfg.gen';
 import { filterDisplayItems, sumDisplayItemsReducer } from './utils';
 
 const defaultLegendOptions: PieChartLegendOptions = {
@@ -56,15 +56,17 @@ export function PieChartPanel(props: Props) {
     return <PanelDataErrorView panelId={id} fieldConfig={fieldConfig} data={data} />;
   }
 
+  const newFieldDisplayValues = transformDisplayValues(options, fieldDisplayValues);
+
   return (
-    <VizLayout width={width} height={height} legend={getLegend(props, fieldDisplayValues)}>
+    <VizLayout width={width} height={height} legend={getLegend(props, newFieldDisplayValues)}>
       {(vizWidth: number, vizHeight: number) => {
         return (
           <PieChart
             width={vizWidth}
             height={vizHeight}
             highlightedTitle={highlightedTitle}
-            fieldDisplayValues={fieldDisplayValues}
+            fieldDisplayValues={newFieldDisplayValues}
             tooltipOptions={options.tooltip}
             pieType={options.pieType}
             displayLabels={options.displayLabels}
@@ -73,6 +75,74 @@ export function PieChartPanel(props: Props) {
       }}
     </VizLayout>
   );
+}
+
+function transformDisplayValues(options: Options, displayValues: FieldDisplay[]): FieldDisplay[] {
+  const thresholdNumber = options.thresholdNumber ?? 5;
+  const thresholdPercentage = options.thresholdPercentage ?? 0.5;
+
+  if (options.thresholdType === PieChartThresholdType.Number) {
+    if (displayValues.length <= thresholdNumber) {
+      return displayValues;
+    }
+    const firstN = displayValues.slice(0, options.thresholdNumber);
+    const others = displayValues.slice(options.thresholdNumber);
+    const totalNumericOthers = others.reduce((acc, item) => acc + item.display.numeric, 0);
+
+    const othersItem: FieldDisplay = {
+      display: {
+        numeric: totalNumericOthers,
+        title: 'Others',
+        color: '#CCCCCC',
+        text: totalNumericOthers.toString(),
+      },
+      field: {
+        custom: {},
+      },
+      name: 'others',
+      hasLinks: false,
+    };
+
+    return [...firstN, othersItem];
+  } else if (options.thresholdType === PieChartThresholdType.Percentage) {
+    const total = displayValues.reduce((acc, item) => acc + item.display.numeric, 0);
+    console.log('Total numeric value:', total);
+
+    const thresholdValue = thresholdPercentage * total;
+    console.log('Threshold percentage:', thresholdPercentage);
+    console.log('Calculated threshold value:', thresholdValue);
+
+    const aboveThreshold = displayValues.filter((item) => item.display.numeric >= thresholdValue);
+    console.log('Items above threshold:', aboveThreshold);
+
+    const belowThreshold = displayValues.filter((item) => item.display.numeric < thresholdValue);
+    console.log('Items below threshold:', belowThreshold);
+
+    if (belowThreshold.length === 0) {
+      return displayValues;
+    }
+
+    const totalNumericBelow = belowThreshold.reduce((acc, item) => acc + item.display.numeric, 0);
+    console.log('Total numeric value of items below threshold:', totalNumericBelow);
+
+    const othersItem: FieldDisplay = {
+      display: {
+        numeric: totalNumericBelow,
+        title: 'Others',
+        color: '#CCCCCC',
+        text: totalNumericBelow.toString(),
+      },
+      field: {
+        custom: {},
+      },
+      name: 'others',
+      hasLinks: false,
+    };
+
+    return [...aboveThreshold, othersItem];
+  }
+
+  return displayValues;
 }
 
 function getLegend(props: Props, displayValues: FieldDisplay[]) {
