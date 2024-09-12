@@ -61,7 +61,7 @@ export const plugin = new PanelPlugin<Options, FieldConfig>(PieChartPanel)
             { value: PieChartLabels.Value, label: 'Value' },
           ],
         },
-      })
+      });
 
     commonOptionsBuilder.addTooltipOptions(builder);
     commonOptionsBuilder.addLegendOptions(builder, false);
@@ -81,13 +81,14 @@ export const plugin = new PanelPlugin<Options, FieldConfig>(PieChartPanel)
 
     builder
       .addRadio({
-        name: 'Threshold Type',
+        name: 'Group items threshold type',
         description: 'Type of threshold to group/show values',
         path: 'thresholdType',
         settings: {
           options: [
-            { value: PieChartThresholdType.Percentage, label: 'Bellow percentage' },
-            { value: PieChartThresholdType.Number, label: 'Show top values' },
+            { value: PieChartThresholdType.None, label: 'No grouping ' },
+            { value: PieChartThresholdType.Percentage, label: 'Group bellow percentage' },
+            { value: PieChartThresholdType.Number, label: 'Show top N values' },
           ],
         },
         defaultValue: PieChartThresholdType.Percentage,

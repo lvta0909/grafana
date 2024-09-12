@@ -49,17 +49,20 @@ export const defaultPieChartLegendOptions: Partial<PieChartLegendOptions> = {
 };
 
 /**
- * Select threshold options to display in the chart.
+ * Select threshold options to group values to display in the chart.
  *  - Percentage: Group values bellow a percentage.
  *  - Number: Display the first n values, group the others.
+ *  - None : No grouping.
  */
 export enum PieChartThresholdType {
+  None = 'none',
   Number = 'number',
   Percentage = 'percentage',
 }
 
 export interface Options extends common.OptionsWithTooltip, common.SingleStatBaseOptions {
   displayLabels: Array<PieChartLabels>;
+  groupedValuesLabel?: string;
   legend: PieChartLegendOptions;
   pieType: PieChartType;
   thresholdNumber?: number;
