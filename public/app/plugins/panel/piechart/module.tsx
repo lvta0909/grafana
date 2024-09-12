@@ -62,12 +62,6 @@ export const plugin = new PanelPlugin<Options, FieldConfig>(PieChartPanel)
           ],
         },
       })
-      .addTextInput({
-        name: 'Grouped Values Label',
-        path: 'groupedValuesLabel',
-        description: 'Label for grouped values when using threshold',
-        defaultValue: 'Others',
-      });
 
     commonOptionsBuilder.addTooltipOptions(builder);
     commonOptionsBuilder.addLegendOptions(builder, false);
@@ -97,6 +91,12 @@ export const plugin = new PanelPlugin<Options, FieldConfig>(PieChartPanel)
           ],
         },
         defaultValue: PieChartThresholdType.Percentage,
+      })
+      .addTextInput({
+        name: 'Grouped Values Label',
+        path: 'groupedValuesLabel',
+        description: 'Label for grouped values when using threshold',
+        defaultValue: 'Others',
       })
       .addNumberInput({
         name: 'Threshold Percentage',
