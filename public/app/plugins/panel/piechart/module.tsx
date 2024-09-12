@@ -61,6 +61,12 @@ export const plugin = new PanelPlugin<Options, FieldConfig>(PieChartPanel)
             { value: PieChartLabels.Value, label: 'Value' },
           ],
         },
+      })
+      .addTextInput({
+        name: 'Grouped Values Label',
+        path: 'groupedValuesLabel',
+        description: 'Label for grouped values when using threshold',
+        defaultValue: 'Others',
       });
 
     commonOptionsBuilder.addTooltipOptions(builder);

@@ -79,6 +79,7 @@ export function PieChartPanel(props: Props) {
 
 function transformDisplayValues(options: Options, displayValues: FieldDisplay[]): FieldDisplay[] {
   const thresholdNumber = options.thresholdNumber ?? 5;
+  const groupedValuesLabel = options.groupedValuesLabel ?? 'Others';
   const thresholdPercentage = options.thresholdPercentage ?? 0.5;
 
   if (options.thresholdType === PieChartThresholdType.Number) {
@@ -92,7 +93,7 @@ function transformDisplayValues(options: Options, displayValues: FieldDisplay[])
     const othersItem: FieldDisplay = {
       display: {
         numeric: totalNumericOthers,
-        title: 'Others',
+        title: groupedValuesLabel,
         color: '#CCCCCC',
         text: totalNumericOthers.toString(),
       },
@@ -128,7 +129,7 @@ function transformDisplayValues(options: Options, displayValues: FieldDisplay[])
     const othersItem: FieldDisplay = {
       display: {
         numeric: totalNumericBelow,
-        title: 'Others',
+        title: groupedValuesLabel,
         color: '#CCCCCC',
         text: totalNumericBelow.toString(),
       },
