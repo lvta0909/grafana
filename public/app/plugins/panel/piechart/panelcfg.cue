@@ -43,10 +43,11 @@ composableKinds: PanelCfg: {
 					common.VizLegendOptions
 					values: [...PieChartLegendValues]
 				} @cuetsy(kind="interface")
-				// Select threshold options to display in the chart.
+				// Select threshold options to group values to display in the chart.
 				//  - Percentage: Group values bellow a percentage.
 				//  - Number: Display the first n values, group the others.
-				PieChartThresholdType: "percentage" | "number" @cuetsy(kind="enum")
+				//  - None : No grouping.
+				PieChartThresholdType: "percentage" | "number" | "none" @cuetsy(kind="enum")
 				Options: {
 					common.OptionsWithTooltip
 					common.SingleStatBaseOptions
