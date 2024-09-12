@@ -42,7 +42,6 @@ composableKinds: PanelCfg: {
 				PieChartLegendOptions: {
 					common.VizLegendOptions
 					values: [...PieChartLegendValues]
-					groupedValuesLabel?: string
 				} @cuetsy(kind="interface")
 				// Select threshold options to display in the chart.
 				//  - Percentage: Group values bellow a percentage.
@@ -57,6 +56,7 @@ composableKinds: PanelCfg: {
 					thresholdType?:       PieChartThresholdType
 					thresholdPercentage?: float64
 					thresholdNumber?:     uint32
+					groupedValuesLabel?:  string
 				} @cuetsy(kind="interface")
 				FieldConfig: common.HideableFieldConfig @cuetsy(kind="interface")
 			}
